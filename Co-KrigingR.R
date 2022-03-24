@@ -23,25 +23,25 @@ library(automap)
 
 #set your directory to read your csv
 setwd("E:/Downscaling/berkay/berkay")
-train = read.csv("cnrm-esm2-1_bias_corrected_Only1979.csv")
+train <- read.csv("cnrm-esm2-1_bias_corrected_Only1979.csv")
 #names(train)[1] <- "id"
 
-#train = train[-c(2,3)]
+#train <- train[-c(2,3)]
 train
 
 setwd("E:/Downscaling/berkay/berkay/CorrectedDataRasterShape/ClippedEra5")
-new_data = read.csv("era5_elevation_clipped_temperature_csv.csv")
-new_data = new_data[-c(3)] # drop unnecessary columns
+new_data <- read.csv("era5_elevation_clipped_temperature_csv.csv")
+#new_data <- new_data[-c(3)] # drop unnecessary columns if needed
 new_data
 
 names(new_data)[3] <- "elevation"
 ##make sure the cmip6 values are named as 'cmip6_values' and elevation as 'elevation' and distance as 'Distance'
 
 # create a data frame for the data which will be trained
-co.var = train[,c(2,10)] ## cmip6_values and elevation
+co.var <- train[,c(2,10)] ## cmip6_values and elevation
 co.var
 
-cor.matrix = rcorr(as.matrix(co.var))
+cor.matrix <- rcorr(as.matrix(co.var))
 cor.matrix ## see the correlation and p value 
 
 
@@ -64,14 +64,13 @@ coordinates(new_data)=~lon+lat
 
 ##autofit with automap package
 
-fit_vgm = autofitVariogram(cmip6_values~elevation, train)
+fit_vgm <- autofitVariogram(cmip6_values~elevation, train)
 plot(fit_vgm)
 temp_krige <- autoKrige(cmip6_values~ elevation, train , new_data)
 temp_krige
 
-###IF AUTOVARIOGRAM IS USED, GO TO RASTERIZE DIRECTLY
-#convert raster
-#CK.pred<-rasterFromXYZ(as.data.frame(CK)[, c("lon", "lat", "cmip6_values.pred")])
+###IF AUTOVARIOGRAM IS USED, RASTERIZE DIRECTLY AND EXPORT THE TIFF BY USING FOLLOWING STEPS
+
 temp_krige.pred <- rasterFromXYZ(as.data.frame(temp_krige$krige_output)[, c("lon", "lat", "var1.pred")])
 
 Rasterized_CoKriged<-ggR(temp_krige.pred, geom_raster = TRUE) +
@@ -92,14 +91,15 @@ Rasterized_CoKriged
 
 writeRaster(temp_krige.pred,'E:/Downscaling/berkay/berkay/Temp/bias-corrected-cokriged-temperature_2045.tif')
 
-
+##End of Auto-variogram method.
 
 ##option 2 is fitting variogram manually
 ############## manual fitting #####################
+#Important Note: This method needs trial and error process which may cause misleading fitted results.
 v.soc<-variogram(cmip6_values~ elevation, data = train,cutoff=15, cloud=F)
 m.soc<-vgm(psill=22,"Ste",range=9.7,nugget = 0.07) ## change coefficients manually
 
-# least square fit
+# fit
 m.f.soc<-fit.variogram(v.soc, m.soc)
 p1<-plot(v.soc, pl=F, model=m.f.soc, main= "Temp")
 p1
@@ -109,7 +109,7 @@ p1
 v.ele<-variogram(elevation~ 1, data = train, cloud=F)
 # Intial parameter set by eye esitmation
 ##autofit
-fit_elevation = autofitVariogram(elevation~1, train,cutoff=500)
+fit_elevation <- autofitVariogram(elevation~1, train,cutoff=500)
 plot(fit_elevation)
 
 
