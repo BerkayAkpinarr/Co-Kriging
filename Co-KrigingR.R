@@ -35,7 +35,7 @@ new_data <- read.csv("era5_elevation_clipped_temperature_csv.csv")
 new_data
 
 names(new_data)[3] <- "elevation"
-##make sure the cmip6 values are named as 'cmip6_values' and elevation as 'elevation' and distance as 'Distance'
+##make sure the cmip6 values are named as 'cmip6_values' and elevation as 'elevation'.
 
 # create a data frame for the data which will be trained
 co.var <- train[,c(2,10)] ## cmip6_values and elevation
@@ -57,8 +57,8 @@ ggplot(co.var, aes(x=cmip6_values, y=elevation)) +
 
 
 #Convert the data frame to a spatial data frame by using sp package.
-coordinates(train) = ~lon+lat
-coordinates(new_data)=~lon+lat
+coordinates(train)<- ~lon+lat
+coordinates(new_data)<- ~lon+lat
 
 # Variogram
 
