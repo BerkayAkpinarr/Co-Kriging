@@ -37,7 +37,7 @@ new_data
 names(new_data)[3] <- "elevation"
 ##make sure the cmip6 values are named as 'cmip6_values' and elevation as 'elevation'.
 
-# create a data frame for the data which will be trained
+# create a data frame for the data, which will be trained, to check correlation
 co.var <- train[,c(2,10)] ## cmip6_values and elevation
 co.var
 
@@ -46,7 +46,7 @@ cor.matrix ## see the correlation and p value
 
 
 
-#plot by omitting the zero elevation values to see correlation
+#plot by omitting the zero elevation values to see correlation, just for information.
 co.var[co.var == 0] <- NA # drop zeros
 ggplot(co.var, aes(x=cmip6_values, y=elevation)) + 
   geom_point(shape=1, color="blue")+
